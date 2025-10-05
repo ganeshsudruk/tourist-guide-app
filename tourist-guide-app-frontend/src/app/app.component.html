@@ -1,0 +1,152 @@
+ <div class="app-container">
+      <!-- Header -->
+      <header class="header">
+        <div class="header-content">
+          <h1 class="app-title">
+            <span class="icon">🌍</span>
+            Tourist Guide
+          </h1>
+          <p class="app-subtitle">Discover amazing places around the world</p>
+        </div>
+      </header>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <div class="container">
+          <!-- Search Section -->
+          <section class="search-section">
+            <div class="search-card">
+              <h2 class="search-title">Where would you like to explore?</h2>
+              <div class="search-form">
+                <div class="input-group">
+                  <input
+                    type="text"
+                    [(ngModel)]="searchQuery"
+                   
+                    placeholder="Enter a city, country, or landmark..."
+                    class="search-input"
+                    [disabled]="isLoading()"
+                  />
+                  <button
+                    (click)="searchPlace()"
+                    [disabled]="!searchQuery.trim() || isLoading()"
+                    class="search-button"
+                  >
+                    <span *ngIf="!isLoading()" class="button-content">
+                      <span class="search-icon">🔍</span>
+                      Explore
+                    </span>
+                    <span *ngIf="isLoading()" class="button-content">
+                      <span class="loading-spinner"></span>
+                      Searching...
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Results Section -->
+          <section class="results-section" *ngIf="guideData() || error()">
+            <!-- Error State -->
+            <div *ngIf="error()" class="error-card">
+              <div class="error-content">
+                <span class="error-icon">⚠️</span>
+                <h3>Something went wrong</h3>
+                <p>{{ error() }}</p>
+                <button (click)="clearError()" class="retry-button">Try Again</button>
+              </div>
+            </div>
+
+            <!-- Success State -->
+            <div *ngIf="guideData()" class="guide-results">
+              <div class="place-header">
+                <h2 class="place-title">{{ guideData()?.place }}</h2>
+              </div>
+
+              <div class="content-grid">
+                <!-- Introduction -->
+                <div class="content-card introduction-card">
+                  <div class="card-header">
+                    <span class="card-icon">📖</span>
+                    <h3>Introduction</h3>
+                  </div>
+                  <div class="card-content">
+                    <p>{{ guideData()?.introduction }}</p>
+                  </div>
+                </div>
+
+                <!-- Top Attractions -->
+                <div class="content-card attractions-card">
+                  <div class="card-header">
+                    <span class="card-icon">🏛️</span>
+                    <h3>Top Attractions</h3>
+                  </div>
+                  <div class="card-content">
+                    <ul class="attraction-list">
+                      <li *ngFor="let attraction of guideData()?.top_attractions" class="attraction-item">
+                        <span class="attraction-bullet">•</span>
+                        {{ attraction }}
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+
+                <!-- Famous Foods -->
+                <div class="content-card food-card">
+                  <div class="card-header">
+                    <span class="card-icon">🍽️</span>
+                    <h3>Famous Foods</h3>
+                  </div>
+                  <div class="card-content">
+                    <div class="food-grid">
+                      <div *ngFor="let food of guideData()?.famous_foods" class="food-item">
+                        <span class="food-icon">🥘</span>
+                        {{ food }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Cultural Highlights -->
+                <div class="content-card culture-card">
+                  <div class="card-header">
+                    <span class="card-icon">🎭</span>
+                    <h3>Cultural Highlights</h3>
+                  </div>
+                  <div class="card-content">
+                    <ul class="culture-list">
+                      <li *ngFor="let highlight of guideData()?.cultural_highlights" class="culture-item">
+                        <span class="culture-bullet">✨</span>
+                        {{ highlight }}
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+
+                <!-- Travel Tips -->
+                <div class="content-card tips-card">
+                  <div class="card-header">
+                    <span class="card-icon">💡</span>
+                    <h3>Travel Tips</h3>
+                  </div>
+                  <div class="card-content">
+                    <ul class="tips-list">
+                      <li *ngFor="let tip of guideData()?.travel_tips" class="tip-item">
+                        <span class="tip-icon">👉</span>
+                        {{ tip }}
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+
+      <!-- Footer -->
+      <footer class="footer">
+        <p>&copy; 2025 Tourist Guide. Explore the world with confidence.</p>
+      </footer>
+    </div>

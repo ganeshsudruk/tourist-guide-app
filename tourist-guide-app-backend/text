@@ -1,0 +1,87 @@
+AIzaSyD2BiWy3bd1X8JB02jQEtCudBsbjcBIR_U api key
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+import google.generativeai as genai
+import json
+import re
+
+# 🔑 Configure Gemini with your API key
+genai.configure(api_key="AIzaSyD2BiWy3bd1X8JB02jQEtCudBsbjcBIR_U")  # replace with real key
+
+app = FastAPI(title="Tourist Guide API", version="3.1")
+
+origins = [
+    "http://localhost:4200",  # Angular dev server
+    "http://127.0.0.1:4200"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,  # allow these origins
+    allow_credentials=True,
+    allow_methods=["*"],    # allow all HTTP methods
+    allow_headers=["*"],    # allow all headers
+)
+# Request schema
+class PlaceRequest(BaseModel):
+    place: str
+
+# Response schema
+class PlaceResponse(BaseModel):
+    place: str
+    introduction: str
+    top_attractions: list[str]
+    famous_foods: list[str]
+    cultural_highlights: list[str]
+    travel_tips: list[str]
+
+# Model selection
+def get_model():
+    try:
+        return genai.GenerativeModel("gemini-1.5-pro-002")
+    except Exception:
+        return genai.GenerativeModel("gemini-1.5-flash")
+
+model = get_model()
+
+@app.get("/")
+def root():
+    return {"message": "Welcome to the Tourist Guide API 🌍"}
+
+@app.post("/tourist-guide", response_model=PlaceResponse)
+def tourist_guide(req: PlaceRequest):
+    place = req.place
+
+    prompt = f"""
+    You are a professional tourist guide. 
+    ONLY return a valid JSON object, nothing else.
+
+    {{
+      "place": "{place}",
+      "introduction": "Short introduction in 3-4 sentences about {place}",
+      "top_attractions": ["Top attraction 1", "Top attraction 2", "Top attraction 3", "Top attraction 4", "Top attraction 5"],
+      "famous_foods": ["Famous food 1", "Famous food 2", "Famous food 3"],
+      "cultural_highlights": ["Highlight 1", "Highlight 2"],
+      "travel_tips": ["Tip 1", "Tip 2", "Tip 3"]
+    }}
+    """
+
+    try:
+        response = model.generate_content(prompt)
+
+        if not response or not response.text:
+            return {"error": "Gemini did not return any content"}
+
+        # ✅ Extract JSON using regex (in case Gemini adds extra text)
+        match = re.search(r"\{.*\}", response.text, re.DOTALL)
+        if match:
+            json_str = match.group(0)
+            data = json.loads(json_str)
+            return data
+        else:
+            return {"error": "Gemini output was not valid JSON", "raw": response.text}
+
+    except Exception as e:
+        return {"error": str(e)}
