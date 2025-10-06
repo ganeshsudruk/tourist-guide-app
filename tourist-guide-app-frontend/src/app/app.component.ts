@@ -44,7 +44,7 @@ export class AppComponent {
     const requestBody = { place: this.searchQuery.trim() };
 
     // Update this URL to match your FastAPI backend URL
-    this.http.post<TouristGuideResponse>('http://localhost:8000/tourist-guide', requestBody)
+    this.http.post<TouristGuideResponse>('https://tourist-guide-app-production.up.railway.app/tourist-guide', requestBody)
       .subscribe({
         next: (data) => {
           this.guideData.set(data);
